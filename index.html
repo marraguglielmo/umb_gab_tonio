@@ -1,9 +1,48 @@
 <!DOCTYPE html>
 <html lang="it">
-<head>
-<meta charset="UTF-8">
-<title>I 18 anni rimandati</title>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+        <title>I 18 anni rimandati</title>
+        <style>
+            body { margin: 0; overflow: hidden; background: black; }
+            
+            #dialogue-box {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 80%;
+                max-width: 600px;
+                background: rgba(0, 0, 0, 0.85);
+                border: 3px solid white;
+                padding: 20px;
+                z-index: 1000; /* Lo tiene sopra il canvas */
+                font-family: 'Press Start 2P', cursive;
+                color: white;
+                display: block;
+            }
+    
+            #dialogue-text {
+                margin: 0 0 15px 0;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+    
+            #continue-btn {
+                background: white;
+                color: black;
+                border: none;
+                padding: 10px 20px;
+                font-family: 'Press Start 2P', cursive;
+                cursor: pointer;
+                display: block;
+                float: right;
+            }
+    
+            #continue-btn:hover { background: #ddd; }
+        </style>
+    </head>
 
 <body>
 
