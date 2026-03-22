@@ -1,14 +1,16 @@
-import { startMeeting2026 } from "./scenes/meeting_2026.js";
-import { startUmbertoIntro } from "./scenes/umberto_intro.js";
+import { startIntro } from './scenes/intro.js';
+import { startMeeting2026 } from './scenes/meeting_2026.js';
+import { startBubiHome2015 } from "./scenes/bubi_home_2015.js";
 
 const GameState = {
-    currentScene: "MEETING_2026",
+    // 1. Cambia la scena iniziale in INTRO
+    currentScene: "INTRO", 
     ctx: null,
     canvas: null,
-    sceneHandle: null, 
+    sceneHandle: null,
 
     update() {
-        // Monitoraggio: se la scena dice di aver finito, cambiamo
+        // Controlla se la scena corrente ha finito (isFinished diventerà true)
         if (this.sceneHandle && this.sceneHandle.isFinished) {
             this.nextStep();
         }
@@ -16,21 +18,22 @@ const GameState = {
     },
 
     nextStep() {
-        if (this.currentScene === "MEETING_2026") {
-            this.currentScene = "INTRO_UMBERTO";
+        // 2. Aggiorna la sequenza: la intro porta al meeting
+        const sequence = {
+            "INTRO": "MEETING_2026",
+            "MEETING_2026": "BUBI_HOME_2015",
+            "BUBI_HOME_2015": "BUBI_SCHOOL_STAMPACCHIA"
+        };
+        
+        const next = sequence[this.currentScene];
+        if (next) {
+            this.currentScene = next;
             this.run();
-        } else {
-            console.log("Fine della parte 1: Umberto è arrivato a destinazione.");
-            this.sceneHandle = null; // Ferma tutto
         }
     },
 
     run() {
-        // Reset grafico totale
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Reset del Bottone (clonazione per pulire eventi vecchi)
+        // Pulizia eventi del tasto "Continua" (per evitare doppie chiamate)
         const btn = document.getElementById("continue-btn");
         if (btn) {
             btn.style.display = "block";
@@ -38,24 +41,44 @@ const GameState = {
             btn.parentNode.replaceChild(newBtn, btn);
         }
 
-        // Caricamento Scena
-        if (this.currentScene === "MEETING_2026") {
+        // 3. Gestione del lancio della Intro
+        if (this.currentScene === "INTRO") {
+            this.sceneHandle = startIntro(this.ctx, this.canvas);
+        } else if (this.currentScene === "MEETING_2026") {
             this.sceneHandle = startMeeting2026(this.ctx, this.canvas);
-        } else if (this.currentScene === "INTRO_UMBERTO") {
-            this.sceneHandle = startUmbertoIntro(this.ctx, this.canvas);
+        } else if (this.currentScene === "BUBI_HOME_2015") {
+            this.sceneHandle = startBubiHome2015(this.ctx, this.canvas);
         }
     }
 };
 
-// Setup Canvas
+// SETUP CANVAS RESPONSIVE
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
-canvas.style.position = "fixed"; canvas.style.top = "0"; canvas.style.left = "0"; canvas.style.zIndex = "1";
+
+// CSS per garantire il full screen senza scroll
+canvas.style.position = "fixed";
+canvas.style.top = "0";
+canvas.style.left = "0";
+canvas.style.width = "100vw";
+canvas.style.height = "100vh";
+canvas.style.display = "block";
+canvas.style.zIndex = "1";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
 document.getElementById("game-container").appendChild(canvas);
 
-const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-window.addEventListener("resize", resize);
-resize();
+const handleResize = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    // Se la scena ha una funzione interna di resize, la chiamiamo
+    if (GameState.sceneHandle && GameState.sceneHandle.onResize) {
+        GameState.sceneHandle.onResize(canvas.width, canvas.height);
+    }
+};
+
+window.addEventListener("resize", handleResize);
+handleResize(); // Primo calcolo
 
 GameState.ctx = ctx;
 GameState.canvas = canvas;
